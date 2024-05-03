@@ -48,7 +48,7 @@ RUN for SUBDIRECTORY in conf data download logs; do \
 
 # Trino writes logs to this directory (at least during tests), so we need to give the process permission
 # to create those log directories. This should be removed when Trino is removed.
-RUN chmod g+w /pulsar/trino
+#RUN chmod g+w /pulsar/trino
 
 ### Create 2nd stage from Ubuntu image
 ### and add OpenJDK and Python dependencies (for Pulsar functions)
@@ -61,9 +61,7 @@ ARG UBUNTU_SECURITY_MIRROR=http://security.ubuntu.com/ubuntu/
 ARG DEFAULT_USERNAME=pulsar
 
 # Install some utilities
-RUN sed -i -e "s|http://archive\.ubuntu\.com/ubuntu/|${UBUNTU_MIRROR:-mirror://mirrors.ubuntu.com/mirrors.txt}|g" \
-     -e "s|http://security\.ubuntu\.com/ubuntu/|${UBUNTU_SECURITY_MIRROR:-http://security.ubuntu.com/ubuntu/}|g" /etc/apt/sources.list \
-     && echo 'Acquire::http::Timeout "30";\nAcquire::ftp::Timeout "30";\nAcquire::Retries "3";' > /etc/apt/apt.conf.d/99timeout_and_retries \
+RUN echo 'Acquire::http::Timeout "30";\nAcquire::ftp::Timeout "30";\nAcquire::Retries "3";' > /etc/apt/apt.conf.d/99timeout_and_retries \
      && apt-get update \
      && apt-get -y dist-upgrade \
      && apt-get -y install netcat dnsutils less procps iputils-ping \
