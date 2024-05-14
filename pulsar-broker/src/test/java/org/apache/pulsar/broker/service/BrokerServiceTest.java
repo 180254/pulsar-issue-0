@@ -1815,12 +1815,12 @@ public class BrokerServiceTest extends BrokerTestBase {
         assertFalse(subscriptionStats.getConsumers().get(0).isBlockedConsumerOnUnackedMsgs());
     }
 
-    @DataProvider(name = "test22657_1a_data")
-    public static Object[][] test22657_1a_data() {
+    @DataProvider(name = "max_unacked_data")
+    public static Object[][] max_unacked_data() {
         return new Object[][]{{1, 1}, {1, 2}, {1, 5}, {2, 2}, {2, 3}, {4, 4}, {4, 8},{10,20}};
     }
 
-    @Test(dataProvider = "test22657_1a_data")
+    @Test(dataProvider = "max_unacked_data")
     public void test22657_1_parameterized(int maxUnackedMsgPerConsumer, int maxUnackedMsgPerSubscription) throws Exception {
         final String ns = "prop/ns-test-%d-%d".formatted(maxUnackedMsgPerConsumer, maxUnackedMsgPerSubscription);
 
