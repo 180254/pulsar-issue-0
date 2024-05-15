@@ -1987,37 +1987,37 @@ public class BrokerServiceTest extends BrokerTestBase {
         }
 
         // Maybe something is still happening asynchronously? Maybe some time is needed to obtain the correct state?
-        // Therefore, awaitility "blob" instead of standard assertions, at least for now.
         Awaitility.await()
                 .atMost(1, TimeUnit.SECONDS)
                 .pollDelay(100, TimeUnit.MILLISECONDS)
-                .until(() -> {
+                .untilAsserted(() -> {
                     SubscriptionStats subscriptionStats = admin.topics().getStats(topicName).getSubscriptions().get(subscriptionName);
                     ConsumerStats consumerStats = subscriptionStats.getConsumers().get(0);
 
                     int currentReceiverQueueSize = ((ConsumerImpl<byte[]>) consumer).getCurrentReceiverQueueSize();
                     int numMessagesInQueue = ((ConsumerImpl<byte[]>) consumer).numMessagesInQueue();
 
-                    long unackedMessagesSubscription = subscriptionStats.getUnackedMessages();
+                    long subscriptionUnackedMessages = subscriptionStats.getUnackedMessages();
+                    int consumerUnackedMessages = consumerStats.getUnackedMessages();
+
                     boolean blockedSubscriptionOnUnackedMsgs = subscriptionStats.isBlockedSubscriptionOnUnackedMsgs();
-                    int unackedMessagesConsumer = consumerStats.getUnackedMessages();
                     boolean blockedConsumerOnUnackedMsgs = consumerStats.isBlockedConsumerOnUnackedMsgs();
 
                     log.info("----");
                     log.info("subscriptionStats: {}", subscriptionStats);
                     log.info("currentReceiverQueueSize: {}", currentReceiverQueueSize);
                     log.info("numMessagesInQueue: {}", numMessagesInQueue);
-                    log.info("unackedMessagesSubscription: {}", unackedMessagesSubscription);
+                    log.info("subscriptionUnackedMessages: {}", subscriptionUnackedMessages);
+                    log.info("consumerUnackedMessages: {}", consumerUnackedMessages);
                     log.info("blockedSubscriptionOnUnackedMsgs: {}", blockedSubscriptionOnUnackedMsgs);
-                    log.info("unackedMessagesConsumer: {}", unackedMessagesConsumer);
                     log.info("blockedConsumerOnUnackedMsgs: {}", blockedConsumerOnUnackedMsgs);
                     log.info("----");
 
-                    return numMessagesInQueue == 0
-                            && unackedMessagesSubscription == 0
-                            && !blockedSubscriptionOnUnackedMsgs
-                            && unackedMessagesConsumer == 0
-                            && !blockedConsumerOnUnackedMsgs;
+                    assertEquals(numMessagesInQueue, 0, "numMessagesInQueue");
+                    assertEquals(subscriptionUnackedMessages, 0, "subscriptionUnackedMessages");
+                    assertEquals(consumerUnackedMessages, 0, "consumerUnackedMessages");
+                    assertFalse(blockedSubscriptionOnUnackedMsgs, "blockedSubscriptionOnUnackedMsgs");
+                    assertFalse(blockedConsumerOnUnackedMsgs, "blockedConsumerOnUnackedMsgs");
                 });
     }
 
@@ -2106,7 +2106,7 @@ public class BrokerServiceTest extends BrokerTestBase {
         Awaitility.await()
                 .atMost(1, TimeUnit.SECONDS)
                 .pollDelay(100, TimeUnit.MILLISECONDS)
-                .until(() -> {
+                .untilAsserted(() -> {
                     SubscriptionStats subscriptionStats = admin.topics().getStats(topicName).getSubscriptions().get(subscriptionName);
                     ConsumerStats consumerStats = subscriptionStats.getConsumers().get(0);
 
@@ -2119,26 +2119,26 @@ public class BrokerServiceTest extends BrokerTestBase {
                     currentReceiverQueueSize.deleteCharAt(currentReceiverQueueSize.length() - 1);
                     numMessagesInQueue.deleteCharAt(numMessagesInQueue.length() - 1);
 
+                    long subscriptionUnackedMessages = subscriptionStats.getUnackedMessages();
+                    int consumerUnackedMessages = consumerStats.getUnackedMessages();
 
-                    long unackedMessagesSubscription = subscriptionStats.getUnackedMessages();
                     boolean blockedSubscriptionOnUnackedMsgs = subscriptionStats.isBlockedSubscriptionOnUnackedMsgs();
-                    int unackedMessagesConsumer = consumerStats.getUnackedMessages();
                     boolean blockedConsumerOnUnackedMsgs = consumerStats.isBlockedConsumerOnUnackedMsgs();
 
                     log.info("----");
                     log.info("subscriptionStats: {}", subscriptionStats);
-                    log.info("currentReceiverQueueSize: {}", currentReceiverQueueSize.toString());
-                    log.info("numMessagesInQueue: {}", numMessagesInQueue.toString());
-                    log.info("unackedMessagesSubscription: {}", unackedMessagesSubscription);
+                    log.info("currentReceiverQueueSize: {}", currentReceiverQueueSize);
+                    log.info("numMessagesInQueue: {}", numMessagesInQueue);
+                    log.info("subscriptionUnackedMessages: {}", subscriptionUnackedMessages);
+                    log.info("consumerUnackedMessages: {}", consumerUnackedMessages);
                     log.info("blockedSubscriptionOnUnackedMsgs: {}", blockedSubscriptionOnUnackedMsgs);
-                    log.info("unackedMessagesConsumer: {}", unackedMessagesConsumer);
                     log.info("blockedConsumerOnUnackedMsgs: {}", blockedConsumerOnUnackedMsgs);
                     log.info("----");
 
-                    return unackedMessagesSubscription == 0
-                            && !blockedSubscriptionOnUnackedMsgs
-                            && unackedMessagesConsumer == 0
-                            && !blockedConsumerOnUnackedMsgs;
+                    assertEquals(subscriptionUnackedMessages, 0, "subscriptionUnackedMessages");
+                    assertEquals(consumerUnackedMessages, 0, "consumerUnackedMessages");
+                    assertFalse(blockedSubscriptionOnUnackedMsgs, "blockedSubscriptionOnUnackedMsgs");
+                    assertFalse(blockedConsumerOnUnackedMsgs, "blockedConsumerOnUnackedMsgs");
                 });
     }
 }
